@@ -1,6 +1,11 @@
 # device-snapshot
 A command line runner to generate webpage snapshots using headless remote chrome browser.
 
+# Usage
+It's recommend to use the headless [docker
+image](https://hub.docker.com/r/chromedp/headless-shell) as a remote chrome
+instance.
+
 ## Command
 
 ```
