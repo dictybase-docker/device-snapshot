@@ -1,7 +1,7 @@
 module github.com/dictyBase-docker/device-snapshot
 
 require (
-	github.com/chromedp/cdproto v0.0.0-20190827000638-b5ac1e37ce90 // indirect
+	github.com/chromedp/cdproto v0.0.0-20190827000638-b5ac1e37ce90
 	github.com/chromedp/chromedp v0.4.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/sirupsen/logrus v1.4.2
