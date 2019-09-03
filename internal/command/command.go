@@ -5,12 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"path/filepath"
 	"strings"
 
 	"github.com/chromedp/chromedp"
 	"github.com/chromedp/chromedp/device"
+	"github.com/chromedp/cdproto/emulation"
+	"github.com/chromedp/cdproto/page"
 	"github.com/dictyBase-docker/device-snapshot/internal/logger"
 	"github.com/urfave/cli"
 )
@@ -18,6 +21,8 @@ import (
 var snapDevices []chromedp.Device = []chromedp.Device{
 	device.IPhone8,
 	device.IPhone8landscape,
+	device.IPad,
+	device.IPadlandscape,
 	device.GalaxyS5,
 	device.GalaxyS5landscape,
 	device.Pixel2XL,
@@ -67,10 +72,7 @@ func GenerateSnapshot(c *cli.Context) error {
 		for _, d := range snapDevices {
 			var b []byte
 			err := chromedp.Run(ctx,
-				chromedp.Emulate(d),
-				chromedp.Navigate(url),
-				chromedp.CaptureScreenshot(&b),
-				chromedp.Emulate(device.Reset),
+				fullScreenshot(url, 90, &b, d),
 			)
 			fname := fmt.Sprintf("screenshot%s-%s.png", strings.Replace(p, "/", "-", -1), d.Device().Name)
 			if err != nil {
@@ -92,4 +94,49 @@ func GenerateSnapshot(c *cli.Context) error {
 		}
 	}
 	return nil
+}
+
+// fullScreenshot takes a screenshot of the entire browser viewport.
+func fullScreenshot(urlstr string, quality int64, res *[]byte, d chromedp.Device) chromedp.Tasks {
+	return chromedp.Tasks{
+		chromedp.Emulate(d),
+		chromedp.Navigate(urlstr),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			// get layout metrics
+			_, _, contentSize, err := page.GetLayoutMetrics().Do(ctx)
+			if err != nil {
+				return err
+			}
+
+			width, height := int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
+
+			// force viewport emulation
+			err = emulation.SetDeviceMetricsOverride(width, height, 1, false).
+				WithScreenOrientation(&emulation.ScreenOrientation{
+					Type:  emulation.OrientationTypePortraitPrimary,
+					Angle: 0,
+				}).
+				Do(ctx)
+			if err != nil {
+				return err
+			}
+
+			// capture screenshot
+			*res, err = page.CaptureScreenshot().
+				WithQuality(quality).
+				WithClip(&page.Viewport{
+					X:      contentSize.X,
+					Y:      contentSize.Y,
+					Width:  contentSize.Width,
+					Height: contentSize.Height,
+					Scale:  1,
+				}).Do(ctx)
+			if err != nil {
+				return err
+			}
+			return nil
+		}),
+		chromedp.CaptureScreenshot(res),
+		chromedp.Emulate(device.Reset),
+	}
 }
