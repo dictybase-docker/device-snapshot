@@ -25,8 +25,6 @@ var snapDevices []chromedp.Device = []chromedp.Device{
 	device.IPadlandscape,
 	device.GalaxyS5,
 	device.GalaxyS5landscape,
-	device.Pixel2XL,
-	device.Pixel2XLlandscape,
 }
 
 type ChromeWebsocketInfo struct {
@@ -74,7 +72,7 @@ func GenerateSnapshot(c *cli.Context) error {
 			err := chromedp.Run(ctx,
 				fullScreenshot(url, 90, &b, d),
 			)
-			fname := fmt.Sprintf("screenshot%s-%s.png", strings.Replace(p, "/", "-", -1), d.Device().Name)
+			fname := fmt.Sprintf("snapshot-%s-%s.png", strings.Replace(p, "/", "-", -1), d.Device().Name)
 			if err != nil {
 				return cli.NewExitError(
 					fmt.Sprintf("error in running remote chrome for url %s %s", url, err),
@@ -90,7 +88,7 @@ func GenerateSnapshot(c *cli.Context) error {
 					2,
 				)
 			}
-			l.Debugf("save file of the snapshot %s", fname)
+			l.Debugf("saved file of snapshot %s", fname)
 		}
 	}
 	return nil
@@ -136,7 +134,6 @@ func fullScreenshot(urlstr string, quality int64, res *[]byte, d chromedp.Device
 			}
 			return nil
 		}),
-		chromedp.CaptureScreenshot(res),
 		chromedp.Emulate(device.Reset),
 	}
 }
