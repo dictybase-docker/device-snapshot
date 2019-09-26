@@ -33,13 +33,15 @@ func main() {
 			Usage: "webpage paths for which the snapshots will be taken",
 		},
 		cli.StringFlag{
-			Name:  "remote-chrome-host,rh",
-			Usage: "remote chrome host",
+			Name:   "remote-chrome-host,rh",
+			Usage:  "remote chrome host",
+			EnvVar: "REMOTE_CHROME_HOST",
 		},
 		cli.IntFlag{
-			Name:  "remote-chrome-port,rp",
-			Usage: "remote chrome port",
-			Value: 9222,
+			Name:   "remote-chrome-port,rp",
+			Usage:  "remote chrome port",
+			EnvVar: "REMOTE_CHROME_PORT",
+			Value:  9222,
 		},
 		cli.StringFlag{
 			Name:  "output,o",
